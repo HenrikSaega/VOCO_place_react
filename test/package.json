@@ -1,0 +1,14 @@
+{
+  "name": "voco-place-tests",
+  "version": "1.0.0",
+  "description": "Koormustestid voco-place serverile",
+  "main": "loadTest.js",
+  "scripts": {
+    "test": "node loadTest.js",
+    "test:fast": "node loadTest.js --users=5 --duration=10",
+    "test:continuous": "node loadContinousTest.js"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}

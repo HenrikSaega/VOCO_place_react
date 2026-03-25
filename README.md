@@ -1,70 +1,171 @@
-# Getting Started with Create React App
+# voco-place-react
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Reaalajaline pikslitahvel, kus frontend suhtleb backendiga Socket.IO kaudu ja tahvli olek salvestatakse SQLite andmebaasi.
 
-## Available Scripts
+## Projekti osad
 
-In the project directory, you can run:
+- `frontend/` – Vite + React kasutajaliides
+- `backend/` – Express + Socket.IO + Sequelize + SQLite server
+- `test/` – koormus- ja simulatsioonitestid
 
-### `npm start`
+## Eeldused
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Node.js
+- npm
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Paigaldus
 
-### `npm test`
+Paigalda sõltuvused igas kasutatavas kaustas eraldi.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Frontend
 
-### `npm run build`
+```bash
+cd frontend
+npm install
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Backend
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+cd backend
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Testid
 
-### `npm run eject`
+```bash
+cd test
+npm install
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Kuidas süsteem tööle panna
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Süsteem koosneb vähemalt kahest protsessist: backend ja frontend.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 1. Käivita backend
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+cd backend
+node server.js
+```
 
-## Learn More
+Või:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+cd backend
+npm start
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Backend teeb järgmist:
 
-### Code Splitting
+- käivitab serveri pordil `3000`
+- loob Socket.IO ühendused
+- ühendub SQLite andmebaasiga
+- laeb tahvli andmed mällu
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Kui kõik töötab, peaksid nägema umbes selliseid logisid:
 
-### Analyzing the Bundle Size
+```text
+Andmebaas ühendatud!
+Backend töötab pordil 3000
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 2. Käivita frontend
 
-### Making a Progressive Web App
+```bash
+cd frontend
+npm run dev
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Frontend töötab vaikimisi aadressil:
 
-### Advanced Configuration
+```text
+http://localhost:5173
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Frontend ühendub backendiga aadressil `http://localhost:3000`.
 
-### Deployment
+### 3. Ava rakendus brauseris
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Ava:
 
-### `npm run build` fails to minify
+```text
+http://localhost:5173
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Kui backend ja frontend töötavad, peaksid nägema pikslitahvlit ning ühenduse staatust.
+
+## Testide käivitamine
+
+Testid eeldavad, et backend juba töötab.
+
+### Tavaline koormustest
+
+```bash
+cd test
+node loadTest.js
+```
+
+See test:
+
+- käivitab vaikimisi 20 simuleeritud kasutajat
+- laseb neil tegutseda 30 sekundit
+- kogub RTT, CPU ja RAM mõõdikuid
+- värvib lõpus testis muudetud pikslid tagasi valgeks
+
+Näide kohandatud käivituseks:
+
+```bash
+node loadTest.js --users 200 --duration 30 --connect-wait 20 --ramp-up 10
+```
+
+### Pidev juhuslik koormustest
+
+```bash
+cd test
+node loadContinousTest.js
+```
+
+See test erineb tavalisest selle poolest, et kasutajad ei tegutse ühtlase intervalliga, vaid iga kasutaja teeb järgmise tegevuse juhuslikul ajal.
+
+Näide:
+
+```bash
+node loadContinousTest.js --users 50 --duration 20 --min-delay 100 --max-delay 1200
+```
+
+Või npm scriptiga:
+
+```bash
+cd test
+npm run test:continuous
+```
+
+## Olulised pordid
+
+- `3000` – backend
+- `5173` – frontend
+
+## Levinud probleemid
+
+### Port `3000` on juba kasutuses
+
+Kui backend käivitamisel tuleb `EADDRINUSE`, siis mõni teine protsess juba kasutab porti `3000`.
+
+### Frontend ei käivitu käsuga `npm start`
+
+Frontend kasutab Vite'i, seega õige käsk on:
+
+```bash
+npm run dev
+```
+
+### Test ei saa ühendust
+
+Kontrolli, et backend jookseb enne testide käivitamist.
+
+## Märkused
+
+- Backend andmebaas salvestatakse faili `backend/database.sqlite`
+- Testid puhastavad enda loodud pikslid lõpus tagasi valgeks
+- Projektis on olemas ka vana juurprojekti React struktuur, kuid aktiivne kasutajaliides jookseb kaustast `frontend/`

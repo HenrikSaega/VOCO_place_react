@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ColorModal from './components/color-modal';
+import './styles/canvas-board.css';
 
-const BOARD_SIZE = 1000;
-const PIXEL_SIZE = 1; // 1px canvas-piksel, CSS transform skaleerib
-
-// Hex värvi teisendamine RGB komponentideks
+const BOARD_SIZE = 100;
+const PIXEL_SIZE = 1;
 function hexToRgb(hex) {
   const h = hex || '#FFFFFF';
   return [
@@ -14,25 +14,18 @@ function hexToRgb(hex) {
 }
 const COOLDOWN_SECONDS = 3;
 
-// Värvid, mida näidata modaalis
-const COLORS = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#000000", "#FFFFFF"];
-
-export default function CanvasBoard({ socket, board, isConnected }) {
+export default function CanvasBoard({ socket, board, isConnected, onPixelDraw }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
-  const imageDataRef = useRef(null); // Vahemälus ImageData kiireks joonistamiseks
-  
-  // Kaamera ja hiire olekud hoiame useRef-is, et mitte käivitada re-renderdusi
+  const imageDataRef = useRef(null);
   const camera = useRef({ scale: 1, targetScale: 1, panX: 0, targetPanX: 0, panY: 0, targetPanY: 0 });
   const mouse = useRef({ isDragging: false, isClick: false, startDragX: 0, startDragY: 0 });
   const hover = useRef({ x: null, y: null });
-  
-  // Reacti state UI jaoks (modal ja cooldown)
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPixel, setSelectedPixel] = useState({ x: null, y: null });
   const [cooldown, setCooldown] = useState(0);
 
-  // 0. BOARD MUUTUMISEL UUENDAME IMAGEDATA PUHVRIT (mitte kogu frameloop)
   useEffect(() => {
     if (board.length === 0) return;
     if (!imageDataRef.current) {
@@ -51,7 +44,6 @@ export default function CanvasBoard({ socket, board, isConnected }) {
     });
   }, [board]);
 
-  // 1. KAAMERA ANIMATSIOON JA LAUA JOONISTAMINE
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -61,24 +53,34 @@ export default function CanvasBoard({ socket, board, isConnected }) {
     const renderLoop = () => {
       const cam = camera.current;
       
-      // Kaamera sujuv liikumine (lerp)
       cam.scale += (cam.targetScale - cam.scale) * 0.15;
       cam.panX += (cam.targetPanX - cam.panX) * 0.15;
       cam.panY += (cam.targetPanY - cam.panY) * 0.15;
 
-      // Joonistame laua ImageData puhvrist (üks GPU-call kogu kaadri jaoks)
       if (imageDataRef.current) {
         ctx.putImageData(imageDataRef.current, 0, 0);
       }
 
-      // Joonistame hover efekti (1px täide, CSS zoom skaleerib)
       const { x: hX, y: hY } = hover.current;
       if (hX !== null && hY !== null && !modalOpen) {
         ctx.fillStyle = cooldown > 0 ? "rgba(231, 76, 60, 0.7)" : "rgba(0, 0, 0, 0.5)";
         ctx.fillRect(hX, hY, 1, 1);
       }
 
-      // Rakendame CSS transformatsiooni lõuendile (nagu su algses koodis)
+      if (selectedPixel.x !== null && selectedPixel.y !== null && modalOpen) {
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(selectedPixel.x, selectedPixel.y, 1, 1);
+        
+        // punane joon ümber
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#FF0000';
+        ctx.strokeRect(selectedPixel.x - 10, selectedPixel.y - 10, 21, 21);
+        ctx.setLineDash([]);
+      }
+
+      // Rakendame transformatsiooni lõuendile
       canvas.style.transform = `translate(${cam.panX}px, ${cam.panY}px) scale(${cam.scale})`;
       
       animationFrameId = requestAnimationFrame(renderLoop);
@@ -86,9 +88,8 @@ export default function CanvasBoard({ socket, board, isConnected }) {
 
     renderLoop();
     return () => cancelAnimationFrame(animationFrameId);
-  }, [board, cooldown, modalOpen]); // Renderdame uuesti, kui need muutuvad
+  }, [board, cooldown, modalOpen, selectedPixel]);
 
-  // 2. HIIRE SÜNDMUSED
   const handleMouseDown = (e) => {
     if (e.target !== canvasRef.current && e.target !== containerRef.current) return;
     mouse.current.isDragging = true;
@@ -135,7 +136,6 @@ export default function CanvasBoard({ socket, board, isConnected }) {
     }
   };
 
-  // 3. SUUMIMINE
   const handleWheel = (e) => {
     e.preventDefault();
     const cam = camera.current;
@@ -152,7 +152,6 @@ export default function CanvasBoard({ socket, board, isConnected }) {
     cam.targetPanY = e.clientY - (e.clientY - cam.targetPanY) * (cam.targetScale / oldTargetScale);
   };
 
-  // 4. KESKENDAMINE (Recenter)
   const centerCamera = () => {
     const canvasWidth = BOARD_SIZE * PIXEL_SIZE;
     const canvasHeight = BOARD_SIZE * PIXEL_SIZE;
@@ -163,15 +162,23 @@ export default function CanvasBoard({ socket, board, isConnected }) {
     cam.targetPanY = window.innerHeight / 2 - (canvasHeight * cam.targetScale) / 2;
   };
 
-  // Keskendame kaamera automaatselt, kui komponent esimest korda laetakse
   useEffect(() => {
     centerCamera();
   }, []);
 
-  // 5. VÄRVI VALIMINE JA COOLDOWN
+  useEffect(() => {
+    if (modalOpen && selectedPixel.x !== null && selectedPixel.y !== null) {
+      const cam = camera.current;
+      cam.targetScale = 25;
+      cam.targetPanX = window.innerWidth / 2 - (selectedPixel.x * cam.targetScale + cam.targetScale / 2);
+      cam.targetPanY = window.innerHeight / 2 - (selectedPixel.y * cam.targetScale + cam.targetScale / 2);
+    }
+  }, [modalOpen, selectedPixel]);
+
   const handleColorSelect = (color) => {
     setModalOpen(false);
     if (selectedPixel.x !== null && selectedPixel.y !== null) {
+      onPixelDraw?.({ x: selectedPixel.x, y: selectedPixel.y, sentAt: performance.now() });
       socket.emit("drawPixel", { x: selectedPixel.x, y: selectedPixel.y, color });
       startCooldown();
     }
@@ -189,51 +196,38 @@ export default function CanvasBoard({ socket, board, isConnected }) {
   }, [cooldown]);
 
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+    <div className="canvas-board-root">
       
-      {/* UI Paneel */}
-      <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 100, backgroundColor: 'white', padding: '10px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ margin: '0 0 10px 0' }}>Place</h2>
-        <p style={{ color: isConnected ? 'green' : 'red', margin: '0 0 10px 0' }}>
-          {isConnected ? "🟢 Server Ühendatud" : "🔴 Ühendus puudub"}
-        </p>
-        <p style={{ fontWeight: 'bold', color: cooldown > 0 ? '#e74c3c' : '#2ecc71', margin: '0 0 10px 0' }}>
+      <div className="canvas-board-panel">
+        <p className={`canvas-board-cooldown ${cooldown > 0 ? 'is-waiting' : 'is-ready'}`}>
           {cooldown > 0 ? `Oota ${cooldown} s...` : "Saad värvida!"}
         </p>
-        <button onClick={centerCamera} style={{ padding: '5px 10px', cursor: 'pointer' }}>Keskenda Vaade</button>
+        <button className="canvas-board-center-btn" onClick={centerCamera}>Tsentreeri Vaade</button>
       </div>
 
-      {/* Värvivaliku Modal */}
-      {modalOpen && (
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 200, backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
-          <h3>Vali värv pikslile ({selectedPixel.x}, {selectedPixel.y})</h3>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-            {COLORS.map(c => (
-              <div 
-                key={c} 
-                onClick={() => handleColorSelect(c)}
-                style={{ width: 30, height: 30, backgroundColor: c, border: '1px solid black', cursor: 'pointer' }}
-              />
-            ))}
-          </div>
-          <button onClick={() => setModalOpen(false)} style={{ padding: '5px 10px' }}>Tühista</button>
-        </div>
-      )}
+      <ColorModal 
+        isOpen={modalOpen}
+        selectedPixel={selectedPixel}
+        onColorSelect={handleColorSelect}
+        onClose={() => {
+          setModalOpen(false);
+          centerCamera();
+        }}
+      />
 
-      {/* Lõuendi Konteiner (Viewport) */}
       <div 
+        className="canvas-board-viewport"
         ref={containerRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onWheel={handleWheel}
-        style={{ width: '100%', height: '100%', cursor: mouse.current.isDragging ? 'grabbing' : 'crosshair' }}
       >
         <canvas
+          className="canvas-board-canvas"
           ref={canvasRef}
           width={BOARD_SIZE * PIXEL_SIZE}
           height={BOARD_SIZE * PIXEL_SIZE}
-          style={{ transformOrigin: '0 0', imageRendering: 'pixelated' }}
         />
       </div>
     </div>

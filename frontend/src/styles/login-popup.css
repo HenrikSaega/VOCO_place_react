@@ -1,0 +1,154 @@
+.popup-overlay {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	z-index: 1000;
+	padding-top: 0;
+}
+
+.popup-container {
+	position: relative;
+	width: min(420px, calc(100vw - 1rem));
+	background: #1f232b;
+	color: #f2f5fa;
+	padding: 1.5rem;
+	border: 1px solid #2d333d;
+	box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+}
+
+.popup-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 0 0 1rem;
+}
+
+.popup-container h2 {
+	margin: 0;
+	font-size: 1.4rem;
+	font-weight: 700;
+}
+
+.close-btn {
+	width: 2rem;
+	height: 2rem;
+	border: 0;
+	border-radius: 6px;
+	background: #2a3039;
+	color: #f2f5fa;
+	font-size: 1.4rem;
+	cursor: pointer;
+}
+
+.close-btn:hover {
+	background: #3a4452;
+}
+
+.popup-container form {
+	display: grid;
+	gap: 0.85rem;
+}
+
+.form-group {
+	display: grid;
+	gap: 0.35rem;
+}
+
+.form-group label {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #d6dce8;
+}
+
+.form-group input {
+	width: 100%;
+	border: 1px solid #3a4452;
+	background: #171b22;
+	color: #f2f5fa;
+	padding: 0.75rem 0.85rem;
+	font: inherit;
+	box-sizing: border-box;
+}
+
+.form-group input::placeholder {
+	color: #98a2b3;
+}
+
+.form-group input:focus {
+	outline: 2px solid rgba(90, 167, 255, 0.28);
+	outline-offset: 0;
+	border-color: #76b7ff;
+}
+
+.login-btn {
+	border: 0;
+	padding: 0.8rem 1rem;
+	background: #76b7ff;
+	color: #0f1720;
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.login-btn:hover {
+	filter: brightness(1.08);
+}
+
+.auth-feedback {
+	margin: 0.8rem 0 0;
+	font-size: 0.9rem;
+	padding: 0.55rem 0.7rem;
+	border-radius: 6px;
+	border: 1px solid transparent;
+}
+
+.auth-feedback--success {
+	background: rgba(118, 183, 255, 0.14);
+	color: #d6ecff;
+	border-color: rgba(118, 183, 255, 0.45);
+}
+
+.auth-feedback--error {
+	background: rgba(255, 115, 115, 0.14);
+	color: #ffd4d4;
+	border-color: rgba(255, 115, 115, 0.45);
+}
+
+.divider {
+	margin: 1rem 0;
+	color: #b2bdcd;
+	text-align: center;
+	font-size: 0.92rem;
+}
+
+.google-btn {
+    display: flex;
+    margin: 0 auto;
+	justify-content: center;
+	align-items: center;
+	border: none;
+	font: inherit;
+	cursor: pointer;
+    background: none;
+}
+
+hr {
+    border: none;
+	border-top: 1px solid #3a4452;
+    margin: 1rem 0;
+}
+
+@media (max-width: 640px) {
+	.popup-overlay {
+		right: 0;
+	}
+
+	.popup-container {
+		padding: 1.1rem;
+		width: min(360px, calc(100vw - 2rem));
+	}
+
+	.popup-container h2 {
+		font-size: 1.35rem;
+	}
+}

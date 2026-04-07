@@ -1,0 +1,52 @@
+.canvas-board-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.canvas-board-panel {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.canvas-board-cooldown {
+  margin: 0 0 10px 0;
+}
+
+.canvas-board-cooldown.is-waiting {
+  color: #e74c3c;
+}
+
+.canvas-board-cooldown.is-ready {
+  color: #2ecc71;
+}
+
+.canvas-board-center-btn {
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.canvas-board-viewport {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.canvas-board-canvas {
+  transform-origin: 0 0;
+  image-rendering: pixelated;
+}

@@ -169,3 +169,8 @@ Kontrolli, et backend jookseb enne testide käivitamist.
 - Backend andmebaas salvestatakse faili `backend/database.sqlite`
 - Testid puhastavad enda loodud pikslid lõpus tagasi valgeks
 - Projektis on olemas ka vana juurprojekti React struktuur, kuid aktiivne kasutajaliides jookseb kaustast `frontend/`
+
+
+### Test paketid 
+
+jimp

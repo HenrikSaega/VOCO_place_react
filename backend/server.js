@@ -22,7 +22,7 @@ const io = new Server(server, {
     origin: "http://localhost:5173",
     methods: ["GET", "POST"],
   },
-  maxHttpBufferSize: 50e6, // 50MB - vajalik 1000x1000 tahvli jaoks
+  maxHttpBufferSize: 50e6,
 });
 
 const PORT = 3000;

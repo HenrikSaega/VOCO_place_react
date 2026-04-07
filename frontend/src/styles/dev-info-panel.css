@@ -1,0 +1,117 @@
+.dev-panel {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 900;
+  width: min(360px, calc(100vw - 2rem));
+  background: rgba(15, 23, 32, 0.94);
+  border: 1px solid #2f3d4e;
+  color: #d9e3ef;
+  border-radius: 12px;
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  padding: 0.85rem;
+}
+
+.dev-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.dev-panel__header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #f2f5fa;
+}
+
+.dev-panel__close {
+  border: 1px solid #44576d;
+  border-radius: 6px;
+  background: #202d3b;
+  color: #d9e3ef;
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+}
+
+.dev-panel__close:hover {
+  background: #2b3a4a;
+}
+
+.dev-panel__section {
+  border-top: 1px solid #2f3d4e;
+  padding-top: 0.55rem;
+  margin-top: 0.55rem;
+}
+
+.dev-panel__section:first-of-type {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.dev-panel__line {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.85rem;
+  padding: 0.2rem 0;
+}
+
+.dev-panel__line strong {
+  font-size: 0.84rem;
+  color: #f2f5fa;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.dev-panel__line .ok {
+  color: #87db8c;
+}
+
+.dev-panel__line .bad {
+  color: #ff8d8d;
+}
+
+.dev-panel__swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 3px;
+}
+
+.dev-panel__hint {
+  margin: 0.7rem 0 0;
+  font-size: 0.75rem;
+  color: #98a8ba;
+  text-align: right;
+}
+
+.dev-panel-toggle {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 900;
+  border: 1px solid #44576d;
+  border-radius: 999px;
+  background: #202d3b;
+  color: #d9e3ef;
+  padding: 0.5rem 0.85rem;
+  cursor: pointer;
+}
+
+.dev-panel-toggle:hover {
+  background: #2b3a4a;
+}
+
+@media (max-width: 640px) {
+  .dev-panel {
+    width: calc(100vw - 1rem);
+    right: 0.5rem;
+    bottom: 0.5rem;
+  }
+}
